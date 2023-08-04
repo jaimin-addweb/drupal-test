@@ -28,4 +28,4 @@ jobs:
       run: composer global require "squizlabs/php_codesniffer=^3.6"
 
     - name: Run PHPCS
-      run: phpcs --standard=Drupal web/modules/custom web/themes/custom
+      run: phpcs --standard=Drupal .
