@@ -23,3 +23,6 @@ jobs:
 
     - name: Install Composer dependencies
       run: composer install
+
+    - name: Composer Validate
+      run: composer validate
