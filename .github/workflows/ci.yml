@@ -32,7 +32,7 @@ jobs:
       run: composer -V
 
     - name: Install Coder
-      run: composer global require drupal/coder:^8.3.1
+      run: composer global require drupal/coder:^8.3.1 -y
 
     - name: Install Codesniffer
       run: composer global require dealerdirect/phpcodesniffer-composer-installer
