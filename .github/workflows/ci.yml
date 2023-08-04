@@ -1,62 +1,53 @@
-name: Test
+name: D8 Code Review
+
 on:
   push:
-    branches: master
+    branches: [master]
+  pull_request:
+    branches: [master]
 
 jobs:
-  testing:
-    name: Drupal ${{ matrix.drupal-core }} - PHP ${{ matrix.php-versions }}
+  code-standards:
+
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
       matrix:
-        drupal-core: ['9.3.x', '9.4.x']
-        php-versions: ['7.4', '8.0']
+        php_version: ['8.1']
 
-  steps:
-    - name: Checkout Drupal core
+    steps:
+    - name: Check out code
       uses: actions/checkout@v2
       with:
-        repository: drupal/drupal
-        ref: ${{ matrix.drupal-core }}
+        fetch-depth: 1
 
-    - name: Checkout module
-      uses: actions/checkout@v2
-      with:
-        path: modules/commerce_product_saleprice
-
-    - name: Setup PHP, with composer and extensions
+    - name: Set up PHP ${{ matrix.php_version }}
       uses: shivammathur/setup-php@v2
       with:
-        php-version: ${{ matrix.php-versions }}
-        coverage: none
+        php-version: ${{ matrix.php_version }}
 
-    - name: Get composer cache directory
-      id: composercache
-      run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+    - name: Install dependencies
+      run: composer install --dev
 
-    - name: Cache composer dependencies
-      uses: actions/cache@v2
-      with:
-        path: ${{ steps.composercache.outputs.dir }}
-        key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-        restore-keys: ${{ runner.os }}-composer-
+    - name: Composer version
+      run: composer -V
 
-    - name: Install Drupal core dependencies
-      run: |
-        composer --no-interaction --no-progress --prefer-dist --optimize-autoloader install
-    
-    - name: Install module dependencies
-      run: |
-        composer --no-interaction --no-progress require \
-          drupal/commerce
+    - name: Install Coder
+      run: composer global require drupal/coder:^8.3.1
 
-    - name: Install Coder module
-      run: |
-        composer --dev --no-interaction --no-progress require \
-          drupal/coder:8.3.13
+    - name: Install Codesniffer
+      run: composer global require dealerdirect/phpcodesniffer-composer-installer
 
-    - name: Check coding standards
-      run: |
-        ./vendor/bin/phpcs --config-set installed_paths vendor/drupal/coder/coder_sniffer
-        ./vendor/bin/phpcs --standard=Drupal,DrupalPractice --extensions=php,module,install,js modules/commerce_product_saleprice
+    - name: List all of the available packages
+      run: composer global show -P
+
+    - name: Composer home directory
+      run: composer config home
+
+    - name: Verify Registered Standards
+      run: ~/.composer/vendor/bin/phpcs -i
+
+    - name: Manually Set Installed Paths
+      run: ~/.composer/vendor/bin/phpcs --config-set installed_paths ~/.composer/vendor/drupal/coder/coder_sniffer
+
+    - name: Code review initiated
+      run: "~/.composer/vendor/bin/phpcs --standard=Drupal --extensions=php,module,inc,install,test,profile,theme,css,info,txt,md,yml ./\n~/.composer/vendor/bin/phpcs --standard=DrupalPractice --php,module,inc,install,test,profile,theme,css,info,txt,md,yml ./    \n"
