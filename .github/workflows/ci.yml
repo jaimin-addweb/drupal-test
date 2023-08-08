@@ -1,12 +1,12 @@
 name: PHP_CodeSniffer
 
 on:
-  push:
-    branches:
-    - master # Change this to your main branch name if different, e.g., "master"
-  pull_request:
-    branches:
-    - master # Change this to your main branch name if different, e.g., "master"
+  # push:
+  #   branches:
+  #   - master # Change this to your main branch name if different, e.g., "master"
+  # pull_request:
+  #   branches:
+  #   - master # Change this to your main branch name if different, e.g., "master"
 
 jobs:
   phpcs:
